@@ -8,3 +8,14 @@ export const getTodos = () => {
 };
 
 // Add more methods here
+export const addTodo = ({
+  completed,
+  title,
+  userId = USER_ID,
+}: Omit<Todo, 'id'>) => {
+  return client.post<Todo>(`/todos`, { completed, title, userId });
+};
+
+export const deleteTodo = (todoId: number) => {
+  return client.delete(`/todos/${todoId}`);
+};

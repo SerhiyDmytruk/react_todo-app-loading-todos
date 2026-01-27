@@ -1,4 +1,10 @@
 export const Filter: React.FC = () => {
+  // const FILTERS = {
+  //   all: 'All',
+  //   completed: 'Completed',
+  //   active: 'Active',
+  // };
+
   return (
     <nav className="filter" data-cy="Filter">
       <a href="#/" className="filter__link selected" data-cy="FilterLinkAll">
