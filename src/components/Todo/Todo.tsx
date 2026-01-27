@@ -96,6 +96,7 @@
 import classNames from 'classnames';
 import { Todo } from '../../types/Todo';
 import { useState } from 'react';
+import { deleteTodo } from '../../api/todos';
 
 type Props = {
   todo: Todo;
@@ -109,7 +110,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
     setChecked(true);
   };
 
-  const deleteTodo = (todoId: number) => {
+  const buttonHandler = (todoId: number) => {
     deleteTodo(todoId);
   };
 
@@ -140,7 +141,7 @@ export const TodoItem: React.FC<Props> = ({ todo }) => {
         className="todo__remove"
         data-cy="TodoDelete"
         onClick={() => {
-          deleteTodo(id);
+          buttonHandler(id);
         }}
       >
         ×
