@@ -1,19 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserWarning } from './UserWarning';
-import { USER_ID } from './api/todos';
+import { getTodos, USER_ID } from './api/todos';
 import { ErrorNotification } from './components/ErrorNotification';
-import { Filter } from './components/Filter';
 import { TodoList } from './components/TodoList';
 import { NewTodo } from './components/NewTodo';
 import { Todo } from './types/Todo';
+import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[] | undefined>();
-
-  const [error] = useState(false);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [filter, setFilter] = useState('all');
 
   const handleAddTodo = (todo: Todo) => {
     setTodos(prevTodos => (prevTodos ? [...prevTodos, todo] : [todo]));
+  };
+
+  useEffect(() => {
+    getTodos()
+      .then(setTodos)
+      .catch(() => {
+        setError(true);
+        setErrorMessage('Unable to load todos');
+      });
+  }, []);
+
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'all') {
+      return todo;
+    } else if (filter === 'completed') {
+      return todo.completed === true;
+    } else if (filter === 'active') {
+      return todo.completed === false;
+    }
+  });
+
+  const handleToggle = (id: number) => {
+    setTodos((prev: Todo[]) => {
+      prev.map((todo: Todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      );
+    });
   };
 
   if (!USER_ID) {
@@ -26,8 +54,6 @@ export const App: React.FC = () => {
 
       <div className="todoapp__content">
         <header className="todoapp__header">
-          {/* this button should have `active` class only if all todos are completed */}
-
           {todos && (
             <button
               type="button"
@@ -39,33 +65,17 @@ export const App: React.FC = () => {
           <NewTodo newTodo={handleAddTodo} />
         </header>
 
-        {todos && (
-          <>
-            <TodoList todos={todos} />
+        <TodoList todos={filteredTodos} toggleStatus={handleToggle} />
 
-            <footer className="todoapp__footer" data-cy="Footer">
-              <span className="todo-count" data-cy="TodosCounter">
-                3 items left
-              </span>
-
-              {/* Active link should have the 'selected' class */}
-              <Filter />
-
-              {/* this button should be disabled if there are no completed todos */}
-              <button
-                type="button"
-                className="todoapp__clear-completed"
-                data-cy="ClearCompletedButton"
-              >
-                Clear completed
-              </button>
-            </footer>
-          </>
-        )}
+        {todos.length > 1 && <Footer data={todos} setFilter={setFilter} />}
       </div>
 
-      {/* DON'T use conditional rendering to hide the notification */}
-      {error && <ErrorNotification />}
+      <ErrorNotification
+        status={error}
+        statusMessage={errorMessage}
+        setStatus={setError}
+        setStatusMessage={setErrorMessage}
+      />
     </div>
   );
 };
